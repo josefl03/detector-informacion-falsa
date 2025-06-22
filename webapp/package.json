@@ -1,0 +1,19 @@
+{
+  "name": "webapp",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/markdown-component": "^1.0.5",
+    "@astrojs/node": "^9.2.2",
+    "@astropub/md": "^1.0.0",
+    "astro": "^5.9.0",
+    "astro-remote": "^0.3.4",
+    "marked": "^15.0.12"
+  }
+}

@@ -1,0 +1,46 @@
+---
+import loadingIcon from "../assets/loading.svg";
+import LoadingIcon from "./LoadingIcon.astro";
+---
+
+<div {...Astro.props}>
+    <LoadingIcon size="25px" id=`${Astro.props.id}-loading` loading={Astro.props.loading}/>
+</div>
+
+<style>
+    div{
+        --extra: 10px;
+
+        --extra-position: calc(var(--extra) * -1);
+        --extra-size: calc(100% + var(--extra) * 2);
+
+        position: absolute;
+        top: var(--extra-position);
+        left: var(--extra-position);
+        width: var(--extra-size);
+        height: var(--extra-size);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 40px;
+
+        backdrop-filter: blur(var(--blur-size));
+        background-color: rgba(255, 255, 255, 0.5);
+
+        z-index: 1000;
+        user-select: none;
+
+        /* hide by default */
+        opacity: 0;
+        visibility: hidden;
+    }
+
+    div[blur] {
+        /* show when loading */
+        opacity: 1;
+        visibility: visible;
+    }
+    
+</style>

@@ -1,0 +1,104 @@
+---
+import LoadingIcon from './LoadingIcon.astro';
+
+interface Props {
+    state: string;
+    progress: number;
+    showPercentage?: any;
+    loading?: boolean;
+    //color?: string;
+    [key: string]: unknown;
+}
+
+const { state, progress, percentage, loading }: Props = Astro.props;
+---
+<div class=`container` {...Astro.props}>
+    <div class="text-container">
+        <div class="state">{state}</div>
+        <div class="percentage" data-show-percentage={percentage}>{progress * 100}%</div>
+        <LoadingIcon size="20px" id=`${Astro.props.id}-blur-loading` loading={Astro.props.loading}/>
+    </div>
+
+    <div class="progressbar">
+        <div class="progressbar-fill" style={`width: calc(100% * ${progress})`}></div>
+    </div>
+
+</div>
+
+<style>
+    .container{
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+
+        width: 100%;
+
+        max-height: 50px;
+        overflow: hidden;
+    }
+
+    .container[hidden]{
+        max-height: 0px;
+        opacity: 0;
+    }
+
+    .text-container{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+
+        width: 100%;
+        margin-bottom: 3px;
+        
+    }
+
+    .state, .percentage{
+        color: var(--accent-color-dark);
+    }
+
+    .percentage{
+        display: none;;
+    }
+
+    .percentage[data-show-percentage]{
+        display: block;
+    }
+
+    .progressbar{
+        width: 100%;
+        height: 1px;
+    }
+
+    .progressbar-fill{
+        height: 5px;
+        transform: translateY(-2px);
+
+        transition: width 0.3s ease-in-out;
+    }
+
+    .progressbar, .progressbar-fill{
+        background-color: var(--accent-color);
+        border-radius: 999px;
+    }
+
+    /* colors */
+    .container[color="green"] .state,
+    .container[color="green"] .percentage {
+        color: var(--green-color);
+    }
+    .container[color="green"] .progressbar-fill,
+    .container[color="green"] .progressbar{
+        background-color: var(--green-color);
+    }
+
+
+    .container[color="red"] .state,
+    .container[color="red"] .percentage {
+        color: var(--red-color);
+    }
+    .container[color="red"] .progressbar-fill,
+    .container[color="red"] .progressbar{
+        background-color: var(--red-color);
+    }
+</style>

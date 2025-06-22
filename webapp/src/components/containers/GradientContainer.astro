@@ -1,0 +1,86 @@
+---
+import Vertical from '../../layouts/directions/Vertical.astro';
+import LoadingBlur from '../LoadingBlur.astro';
+
+import Button from "../Button.astro";
+
+const {loading, blur} = Astro.props;
+---
+
+<div class="background" {...Astro.props}>
+    <div class="container">
+        <slot/>
+    </div>
+    <div class="gradient">
+    </div>
+        <div class="button-container">
+            <Button value="Ampliar" id="expand-button" style="height: 25px"/>
+        </div>
+    
+    <LoadingBlur id=`${Astro.props.id}-blur` {loading} {blur}/>
+</div>
+
+<style>
+    .background{
+        position: relative;
+
+        width: 100%;
+
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        max-height: 220px;
+    }
+
+    .background[expanded]{
+        max-height: 3000px;
+    }
+
+    .container{
+
+        width: calc(100% - var(--gap-size) * 2);
+        height: 100%;
+
+        overflow: hidden;
+    }
+
+    .gradient{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0) 70%,
+            rgba(255, 255, 255, 1) 100%
+        );
+
+        z-index: 1;
+    }
+
+    .background[expanded] .gradient{
+        opacity: 0;
+    }
+
+    .background[expanded] .container{
+        padding-bottom: 18px;
+    }
+
+    .button-container{
+        position: absolute;
+
+        bottom: -5px;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+
+        z-index: 2;
+    }
+</style>

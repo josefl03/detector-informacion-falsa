@@ -1,0 +1,62 @@
+---
+interface Props {
+  href: string;
+  index: number;
+  title: string;
+  description: string;
+}
+
+const { href, title, description, index } = Astro.props;
+---
+<a class="url" href={href} title={title} target="_blank">
+    <h4>{`[${index}] ${title}`}</h4>
+    <p>{description}</p>
+</a>
+
+<style is:global>
+    .url{
+        width: 100%;
+        padding: 5px 0px;
+
+        text-decoration: none;
+    }
+
+    .url:hover{
+        background-color: var(--input-hover-color);
+    }
+
+    .url:active{
+        background-color: var(--input-active-color);
+    }
+
+    .url:first-child{
+        margin-top: 5px;
+    }
+
+    .url h4{
+        margin: 0 5px 5px 12px;
+
+        color: black;
+        font-size: 1.1rem;
+        font-weight: 500;
+        text-wrap: nowrap;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 3px;
+    }
+
+    .url p{
+        margin: 0 10px 5px 20px;
+        max-height: 52px;
+
+        color: var(--accent-color-dark);
+        font-size: 0.9rem;
+        font-weight: 400;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+</style>

@@ -1,0 +1,40 @@
+input {
+    padding: 0;
+    margin: 0;
+
+    width: 100%;
+    height: var(--input-height);
+
+    background-color: white;
+
+    border-radius: var(--border-radius);
+    border: var(--border);
+
+    font-size: 1rem;
+    font-weight: 100;
+
+    box-shadow: 4px 4px 4px 0px rgba(0,0,0,5%);
+
+    transition: border-color 0.3s ease,
+                background-color 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+input:hover {
+    background-color: var(--input-hover-color);
+    cursor: pointer;
+}
+
+input:active {
+    background-color: var(--input-active-color);
+}
+
+input:disabled {
+    background-color: var(--input-disabled-color);
+    cursor: not-allowed;
+    color: var(--accent-color-dark)
+}

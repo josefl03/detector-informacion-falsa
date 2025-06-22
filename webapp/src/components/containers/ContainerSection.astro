@@ -1,0 +1,89 @@
+---
+import Container from './Container.astro';
+import LoadingBlur from '../LoadingBlur.astro';
+
+interface Props {
+    title: string;
+    [key: string]: unknown;
+}
+---
+
+<div class="section" {...Astro.props}>
+    <h2 id=`${Astro.props.id}-title`>{Astro.props.title}</h2>
+
+    <div class="background">
+        <div class="container">
+            <div class="container-list" id=`${Astro.props.id}-list`>
+                <slot/>
+            </div>
+            <LoadingBlur id=`${Astro.props.id}-blur` loading={Astro.props.loading} blur={Astro.props.blur}/>
+        </div>
+    </div>
+
+</div>
+
+<style>
+	h2{
+        margin: 5px 0 0 0;
+		font-weight: 500;
+	}
+
+    .section{
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: start;
+
+        width: calc(50% - 10px);
+        height: auto;
+
+        gap: var(--gap-size-small);
+        flex: 0 0 auto;
+    }
+
+    .background{
+        height: 100%;
+        width: 100%;
+
+        padding: 0 0 20px 0;
+
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        border-radius: var(--border-radius);
+        border: var(--border);
+
+		background-color:rgb(255, 255, 255);
+
+        box-sizing: border-box;
+    }
+
+    .container{
+        width: 100%;
+        height: 100%;
+
+        position: absolute;
+
+        overflow: hidden;
+    }
+
+    .container-list{
+        width: 100%;
+        height: 100%;
+
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        overflow-y: scroll;
+        overflow-x: hidden;
+    }
+
+    .container-list:has([id$="-blur"]) {
+        overflow-y: hidden;
+    }
+</style>
+

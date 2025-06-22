@@ -1,0 +1,71 @@
+---
+import {renderMarkdown} from "../scripts/markdown";
+
+import Heading1 from "./markdown/Heading1.astro";
+import Heading2 from "./markdown/Heading2.astro";
+import Paragraph from "./markdown/Paragraph.astro";
+import LoadingBlur from "./LoadingBlur.astro";
+
+const html = renderMarkdown(Astro.props.text)
+
+const {loading, blur} = Astro.props;
+---
+
+<div class="container">
+    <div class="md-global" set:html={html} {...Astro.props} />
+    <LoadingBlur id=`${Astro.props.id}-blur` {loading} {blur}/>
+</div>
+
+<style>
+    .container{
+        position: relative;
+    }
+
+    .md-global{
+        text-align: justify;
+        line-height: 1.4;
+    }
+</style>
+
+<style is:global>
+    .md-global h1, .md-global h2 {
+        text-align: left;
+        line-height: 1.2;
+
+        text-align: center;
+    }
+
+    .md-global p:has(img) {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        gap: 10px;
+    }
+
+    .md-global img {
+        
+    }
+
+    .md-global p:first-child {
+        margin-top: 0;
+    }
+
+    .md-global p a::before {
+        content: "🔗";
+        margin-right: 3px;
+    }
+    
+    .md-global p a {
+        padding: 1px 6px;;
+
+        border-radius: 10px;
+
+        background-color: #ececec;
+        color: #163fb3;
+
+        text-decoration: none;
+    }
+
+</style>

@@ -1,0 +1,173 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+import Horizontal from "../layouts/directions/Horizontal.astro";
+import VerticalList from "../layouts/directions/VerticalList.astro";
+import HorizontalList from "../layouts/directions/HorizontalList.astro";
+import Container from "../components/containers/Container.astro";
+import GradientContainer from "../components/containers/GradientContainer.astro";
+import Section from "../components/containers/Section.astro";
+import ContainerSection from "../components/containers/ContainerSection.astro";
+import BadgeSection from "../components/containers/BadgeSection.astro";
+
+import Title from "../components/Title.astro";
+import ProgressBar from "../components/ProgressBar.astro";
+import TextBox from "../components/TextBox.astro";
+import Button from "../components/Button.astro";
+import TabList from "../components/TabList.astro";
+import Markdown from "../components/Markdown.astro";
+import Card from "../components/Card.astro";
+import Annotation from "../components/Annotation.astro";
+import Badge from "../components/Badge.astro";
+import URL from "../components/URL.astro";
+
+const summary_md = `
+# Detector de Información Falsa
+## Trabajo Fin de Grado - Jose Fernández López
+**date: 2023-10-01**
+
+Este proyecto es un detector de información falsa que utiliza técnicas de procesamiento de lenguaje natural y aprendizaje automático para analizar noticias y determinar su veracidad. El objetivo es proporcionar una herramienta útil para combatir la desinformación en línea.
+## Características
+- Análisis de noticias en tiempo real.
+- Evaluación de la veracidad de las fuentes.
+- Interfaz intuitiva y fácil de usar.
+`;
+
+const original_md = `
+# Noticia Original
+## Título de la Noticia
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+## Detalles de la Noticia
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+`;
+
+const conclusion_md = `
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.
+`;
+
+---
+
+<Layout>
+	<Title
+		title="Detector de Información Falsa"
+		subtitle="Trabajo Fin de Grado - Jose Fernández López"
+	/>
+
+	<ProgressBar hidden state="-" progress={0.0} id="phase-progressbar"/>
+
+	<Horizontal>
+		<TextBox placeholder="Escribe aquí la URL de la noticia" id="url-textbox" value="mock"/>
+		<Button value="Buscar" id="search-button"/>
+	</Horizontal>
+
+	<Container hidden id="main-container" style="padding: 10px 25px 30px 25px">
+		<h1>Consultar la Noticia</h1>
+		<TabList
+			id="tab-list"
+			value="0"
+			data-text0={summary_md}
+			data-text1={original_md}
+			/>
+
+		<GradientContainer
+			id="summary-container"
+			>
+			<Markdown text={summary_md} id="summary-markdown"/>
+		</GradientContainer>
+
+		<hr />
+
+		<h1>Resultados del Análisis</h1>
+		<Card id="conclusion-card"color="green" hidden>La noticia contiene información contrastada.</Card>
+		<Markdown text={conclusion_md} id="conclusion-markdown"/>
+
+		<Horizontal>
+			<VerticalList>
+				<Section title="Resumen de los Resultados" id="results-section">
+					<ProgressBar state="La Verifican" progress={0.8} color="green" percentage id="verified-progressbar"/>
+					<ProgressBar state="La Contradicen" progress={0.6} color="red" percentage id="unverified-progressbar"/>
+					<ProgressBar state="Neutro" progress={0.3} percentage id="neutral-progressbar"/>
+
+					<Annotation id="annotation-plaintext">El 98% de los resultados encontrados verifican esta información, lo que significa que los datos presentes en la noticia han sido contrastados y son respaldados por otros medios. </Annotation>
+				</Section>
+
+				<BadgeSection title="Dominio" id="domain-badges">
+					<Badge color="#669999" id="ip-badge">0.0.0.0</Badge>
+					<Badge color="#3366ff" icon="🗺️" id="location-badge">Madrid, ES</Badge>
+					<Badge color="#00cc00" icon="🌐" id="domain-badge">example.com</Badge>
+					<Badge color="#ff9900" icon="⚠️" id="reputation-badge">Mala Reputación</Badge>
+				</BadgeSection>
+
+				<BadgeSection title="Noticia" id="article-badges">
+					<Badge color="red" icon="⛔" id="noauthor-badge">Sin autor</Badge>
+					<Badge color="red" icon="⛔" id="nosources-badge">Sin fuentes</Badge>
+				</BadgeSection>
+
+				<BadgeSection title="Comprobaciones Extra" id="extra-badges">
+					<Badge color="#ff00ff" icon="🕑" id="recent-badge">Muy Reciente!</Badge>
+					<Badge hidden color="#9933ff" icon="💬" id="grammar-badge">Faltas de Ortografía!</Badge>
+				</BadgeSection>
+			</VerticalList>
+			
+			<ContainerSection title="Fuentes Consultadas:" id="sources-container">
+				<URL 
+					href="https://www.example.com/news1" 
+					title="Comunicado Oficial del Gobierno sobre el Tema Tratado en la Noticia" 
+					description="Fuente oficial del gobierno que proporciona información detallada y verificada sobre el tema tratado, incluyendo declaraciones de portavoces y enlaces a documentos oficiales relacionados. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." 
+					index={1}
+				/>
+				<URL href="https://www.abc.es/noticia2" title="Noticia 2" description="Artículo de prensa nacional que verifica los hechos." index={2}/>
+				<URL href="https://www.elpais.com/reportaje" title="Reportaje El País" description="Análisis detallado de la noticia por expertos." index={3}/>
+				<URL 
+					href="https://www.bbc.com/news/world" 
+					title="BBC News - World" 
+					description="Cobertura interaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaanacional de los hechos, proporcionando contexto global y análisis independiente." 
+					index={4}
+				/>
+				<URL 
+					href="https://maldita.es/malditobulo/" 
+					title="Maldita.es - Maldito Bulo" 
+					description="Plataforma española de verificación de hechos que desmiente bulos y noticias falsas." 
+					index={5}
+				/>
+				<URL 
+					href="https://factcheck.org/2023/10/fake-news-analysis" 
+					title="FactCheck.org - Fake News Analysis" 
+					description="Análisis detallado de la noticia y verificación de datos por expertos en fact-checking." 
+					index={6}
+				/>
+				<URL 
+					href="https://www.newtral.es/verificacion" 
+					title="Newtral - Verificación" 
+					description="Equipo de verificación español que analiza la veracidad de la información publicada en medios." 
+					index={7}
+				/>
+				<URL 
+					href="https://elpais.com/chequeo" 
+					title="El País - Chequeo" 
+					description="Sección de verificación de hechos de El País, con informes y análisis de noticias virales." 
+					index={8}
+				/>
+			</ContainerSection>
+		</Horizontal>
+	</Container>
+</Layout>
+
+<style>
+	h1 {
+		margin: 0;
+	}
+
+	hr {
+		width: calc(100%);
+		margin: 10px 0 0 0;
+	}
+
+	.left-aligned {
+		justify-content: left;
+		width: 100%;
+	}
+</style>
+
+<script src="../scripts/main.ts"></script>

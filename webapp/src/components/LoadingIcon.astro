@@ -1,0 +1,38 @@
+---
+import loadingIcon from '../assets/loading.svg';
+
+const size = Astro.props.size || 30;
+---
+
+<img
+    src={loadingIcon.src}
+    alt="Loading..." {...Astro.props}
+    style=`--spinner-size: ${size}`
+    loading={Astro.props.loading}
+/>
+
+<style>
+    img{
+        width: var(--spinner-size);
+        height: var(--spinner-size);
+
+        filter: invert(0.5) grayscale(0.5);
+
+        animation: spin 1.5s linear infinite;
+
+        display: none;
+    }
+
+    img[loading]{
+        display: block;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>

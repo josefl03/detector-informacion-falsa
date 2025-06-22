@@ -1,0 +1,75 @@
+---
+import "../styles/input.css"
+
+import Button from './Button.astro';
+---
+
+<div class="tab-list" {...Astro.props}>
+    <input type="button" class="background-button"/>
+    <input type="button" class="foreground-button"/>
+
+    <ul class="tab-list-items">
+        <li class="tab-list-item">
+            <span>Resumen de la Noticia</span>
+        </li>
+        <li class="tab-list-item">
+            <span>Noticia Original</span>
+        </li>
+    </ul>
+</div>
+
+<style>
+    .tab-list{
+        position: relative;
+        width: 100%;
+
+        margin-bottom: 10px;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        gap: var(--gap-size);
+    }
+
+    .background-button{
+        width: 100%;
+        background-color: var(--input-background-color);
+    }
+
+    .foreground-button{
+        position: absolute;
+        top: 0;
+        left: 0%;
+
+        width: 50%;
+
+        transition: left 0.3s ease-in-out;
+    }
+
+    input:focus{
+        border: var(--border) !important;
+    }
+    
+    ul{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content:space-around;
+        
+        position: absolute;
+        width:100%;
+
+        padding: 0;
+
+        list-style: none;
+        pointer-events: none;
+    }
+
+    li{
+        width: 100%;
+        text-align: center;
+
+        pointer-events: none;
+    }
+</style>

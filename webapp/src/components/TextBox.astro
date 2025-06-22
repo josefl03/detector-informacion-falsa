@@ -1,0 +1,19 @@
+---
+import "../styles/input.css";
+---
+
+<input type="text" {...Astro.props}>
+
+<style>
+    input{
+        padding-left: 8px;
+    }
+
+    input::placeholder {
+        color: var(--accent-color-light);
+    }
+
+    input:hover {
+        cursor:text;
+    }
+</style>

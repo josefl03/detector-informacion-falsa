@@ -1,0 +1,43 @@
+<div class="container" {...Astro.props}>
+    <div class="label">
+        <slot/>
+    </div>
+</div>
+
+<style>
+    .container{
+        width: 100%;
+        padding: 20px 0;
+
+        margin-bottom: 10px;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: var(--border-radius);
+
+        background-color: var(--default-color-light);
+        color: var(--default-color);
+
+        max-height: 100px;
+        overflow: hidden;
+    }
+
+    .container[hidden] {
+        max-height: 0px;
+        opacity: 0;
+        padding: 0;
+        margin-bottom: 0px;
+    }
+
+    .container[color="green"] {
+        background-color: var(--green-color-light);
+        color: var(--green-color);
+    }
+    .container[color="red"] {
+        background-color: var(--red-color-light);
+        color: var(--red-color);
+    }
+</style>

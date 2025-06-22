@@ -1,0 +1,16 @@
+---
+import "../styles/input.css"
+---
+
+<input type="button" {...Astro.props}>
+    <slot/>
+</input>
+
+<style>
+    input{
+        width: fit-content;
+        height: calc(var(--input-height) + 4px);
+
+        padding: 0 30px;
+    }
+</style>

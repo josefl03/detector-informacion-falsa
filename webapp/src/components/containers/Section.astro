@@ -1,0 +1,54 @@
+---
+import LoadingBlur from '../LoadingBlur.astro';
+
+interface Props {
+    title: string;
+    [key: string]: unknown;
+}
+
+const {loading, blur} = Astro.props;
+---
+
+<div class="container" {...Astro.props}>
+    <h2>{Astro.props.title}</h2>
+
+    <div class="items">
+        <LoadingBlur id=`${Astro.props.id}-blur` {loading} {blur}/>
+        <slot />
+    </div>
+</div>
+
+<style>
+	h2{
+        margin: 5px 0 0 0;
+		font-weight: 500;
+	}
+
+    .container{
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: start;
+
+        width: 100%;
+        height: 100%;
+
+        gap: var(--gap-size-small);
+    }
+
+    .items{
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        justify-content: start;
+
+        width: calc(100% - 20px);
+        height: 100%;
+
+        margin-left: 5px;
+
+        gap: var(--gap-size);
+    }
+</style>
+

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<!--<link rel="icon" type="image/svg+xml" href="/favicon.svg" />-->
+		<meta name="generator" content={Astro.generator} />
+		<title>Detector de Información Falsa | Jose Fernández López</title>
+
+		<!--- Custom Fonts --->
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+
+		<!--  -->
+	</head>
+	<body>
+		<div class="container">
+			<slot />
+		</div>
+	</body>
+</html>
+
+<style is:global>
+	*{
+		transition: all 0.5s ease-in-out;
+	}
+</style>
+
+<style>
+	html,
+	body {
+		margin: 0;
+
+		width: 100%;
+		height: auto;
+
+		font-family: "Inter", sans-serif;
+		font-weight: 400;
+
+		background: radial-gradient(
+			circle at 2000px 4000px,
+			rgb(156, 156, 156) 0%,
+			rgb(255, 255, 255) 100%
+			);
+		background-repeat: no-repeat;
+
+		/* vars */
+
+		--accent-color: #888888;
+		--accent-color-dark: #666666;
+		--accent-color-light: #aaaaaa;
+
+		--input-height: 40px;
+		--input-hover-color: #f0f0f0;
+		--input-active-color: #e0e0e0;
+		--input-disabled-color: #d0d0d0;
+
+		--input-background-color: #e7e7e7;
+
+		--border-radius: 10px;
+		--border: 2px solid var(--accent-color-light);
+
+		--gap-size: 10px;
+		--gap-size-small: 8px;
+
+		--default-color: #333333;
+		--default-color-light: #ebebeb;
+		--green-color: #1dbe22;
+		--green-color-light: #e6ffe7;
+		--red-color: #d30101;
+		--red-color-light: #ffe6e6;
+
+		--blur-size: 5px;
+	}
+
+	.container{
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 10px;
+
+		max-width: min(900px, 90%);
+		margin: 0 auto;
+
+		/*background-color: #cccccc;*/
+	}
+</style>

@@ -1,0 +1,48 @@
+---
+import Vertical from '../../layouts/directions/Vertical.astro';
+import LoadingBlur from '../LoadingBlur.astro';
+---
+
+<div class="background" {...Astro.props}>
+    <div class="container">
+        <slot/>
+    </div>
+</div>
+
+<style>
+    .background{
+        height: 100%;
+        width: 100%;
+
+        padding: 0 0 20px 0;
+        margin: 0 0 100px 0;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        border-radius: var(--border-radius);
+        border: var(--border);
+
+		background-color:rgb(255, 255, 255);
+
+        box-sizing: border-box;
+        overflow: hidden;
+
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .background[hidden] {
+        opacity: 0;
+    }
+
+    .container{
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        gap: var(--gap-size);
+    }
+</style>

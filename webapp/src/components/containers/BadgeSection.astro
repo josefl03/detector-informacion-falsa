@@ -1,0 +1,15 @@
+---
+import Section from './Section.astro';
+import HorizontalList from '../../layouts/directions/HorizontalList.astro';
+
+interface Props {
+    title: string;
+    [key: string]: unknown;
+}
+---
+
+<Section {...Astro.props}>
+    <HorizontalList>
+        <slot />
+    </HorizontalList>
+</Section>
