@@ -1,0 +1,8 @@
+[project]
+name="fake_news_detector"
+version="1.0.0"
+description="Fake News Detector Library"
+authors=[
+    {name="Jose Fernandez", email="jose.fernandezl@edu.uah.es"},
+]
+dependencies=[]
