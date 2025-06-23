@@ -9,9 +9,11 @@ import os
 import queue
 import time
 
+# Ensure the path to the library is included
+sys.path.append("./libreria/")
+
 import mock
 
-sys.path.append(".")
 from fake_news_detector.fake_news_detector import FakeNewsDetector
 
 app = FastAPI()
@@ -89,4 +91,4 @@ async def websocket_endpoint(websocket: WebSocket):
         
 if __name__ == "__main__":
     logger.info("Starting WebSocket server on ws://localhost:8000/ws")
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

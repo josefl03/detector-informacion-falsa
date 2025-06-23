@@ -1,9 +1,8 @@
 import time
 import random
 import sys
-sys.path.append(".")
 
-from fake_news_detector import FakeNewsDetector, utils
+from fake_news_detector.fake_news_detector import FakeNewsDetector, utils
 
 BASE_FOLDER = "backend/mocks/"
 PHASE_MOCKS = [
