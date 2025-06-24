@@ -7,9 +7,9 @@ import Card from "../components/Card.astro";
 
 window as any;
 
-const BACKEND_API_URL = import.meta.env.PUBLIC_BACKEND_API_URL || "ws://localhost:8000/ws";
+const BACKEND_API_URL = "ws://localhost:8001/ws";
 
-const ALERTS = false; // Set to true to enable alerts
+const ALERTS = true; // Set to true to enable alerts
 
 const phaseProgress = document.getElementById('phase-progressbar') as HTMLDivElement;
 
@@ -208,6 +208,7 @@ function onWebsocketOpen() {
     console.log("WebSocket connection established.");
 }
 
+let wsError = false;
 function onWebsocketError(error: any) {
     // Enable button and stop loading
     finishAnalysis();
@@ -215,11 +216,16 @@ function onWebsocketError(error: any) {
     // Report the error
     console.error("WebSocket error:", error);
     showAlert(`Failed to connect to ${error.currentTarget?.url}`);
+    wsError = true;
 }
 
 function onWebsocketClose() {
     console.log("WebSocket connection closed.");
-    showAlert(`Server disconnected.`);
+
+    if (!wsError)
+        showAlert(`Server disconnected.`);
+    else
+        wsError = false;
 
     // Enable button and stop loading
     finishAnalysis();
@@ -304,6 +310,22 @@ function unBlur(element: any) {
     );
 }
 
+function reBlur(element: any) {
+    // Remove blur and loading attributes
+    utils.handleAttributeToSuffix(
+        element,
+        "blur",
+        "-blur",
+        true
+    );
+    utils.handleAttributeToSuffix(
+        element,
+        "loading",
+        "-blur-loading",
+        true
+    );
+}
+
 // Component UI/UX handling
 function setProgressBarValue(
     progressBar: HTMLDivElement,
@@ -338,6 +360,11 @@ function handleMessage(data_raw: string) {
         return;
     }
 
+    if (data === null){
+        console.warn("Received null data, ignoring.");
+        return;
+    }
+
     console.log("Received data:", data);
 
     // Check for errors
@@ -363,101 +390,21 @@ function handleMessage(data_raw: string) {
     const state: string = TEXTS.stateProgressBar[data.phase as keyof typeof TEXTS.stateProgressBar || "unknown"];
     setProgressBarState(phaseProgress, state);
 
+    urlTextbox.value = data.url;
+
     // Phase-specific handling
     let phase_n = 0;
     const phase_n_total = 11;
 
     switch (data.phase) {
-        case "check_domain":
-            phase_n = 1;
+        ///////////////////////////////////////////////
+        case "finished":
+            phase_n += 1;
 
-            // Set the domain badges
-            ipBadgeText.textContent = data.ip;
-            locationBadgeText.textContent = `${data.ip_country}, ${data.ip_region}`;
-            domainBadgeText.textContent = data.domain;
-            
-            // Unblur section
-            unBlur(domainBadges);
+            finishAnalysis();
 
-            break;
-        case "download_article":
-            phase_n = 2;
-            break;
-        case "parse_article":
-            phase_n = 3;
-
-            break;
-        case "process_article":
-            phase_n = 4;
-
-            // Set summary markdown
-            const summaryHtml = renderMarkdown(data.summary) as string;
-            tabList.setAttribute("data-text0", summaryHtml);
-            summaryMarkdown.innerHTML = summaryHtml;
-
-            // Set article markdown
-            const articleHtml = renderMarkdown(data.markdown) as string;
-            tabList.setAttribute("data-text1", articleHtml);
-
-            // Unblur section
-            unBlur(summaryContainer);
-
-            break;
-        case "search":
-            phase_n = 5;
-            break;
-        case "process_search":
-            phase_n = 6;
-
-            // Clear container
-            sourcesContainerList.innerHTML = "";
-
-            // Add different sources to the container
-            data.search_results.forEach((result: any) => {
-                // Search if the item already exists
-                const item = document.getElementById(`source-${result.url}`);
-                if (item) {
-                    // Already exists, skip
-                    return;
-                }
-
-                // Get number of children
-                const childrenCount = sourcesContainerList.children.length + 1;
-
-                // Create a new list item
-                const listItem = document.createElement('a');
-                listItem.id = `source-${result.url}`;
-                listItem.className = 'url';
-                listItem.href = result.url;
-                listItem.title = result.title;
-                listItem.target = '_blank';
-
-                listItem.innerHTML = (`
-                    <h4>[${childrenCount}] ${result.title}</h4>
-                    <p>${result.summary}</p>
-                `);
-
-                // Add the item to the container
-                sourcesContainerList.appendChild(listItem);
-            });
-
-            // Update the sources count
-            const sourcesCount = data.search_results.length;
-            //sourcesContainerTitle.textContent = `${TEXTS.sourcesContainer.title} ${sourcesCount}`;
-
-            // Unblur container (if blurry)
-            if (!sourcesContainer.getAttribute("blur")) {
-                unBlur(sourcesContainer);
-            }
-            break;
-        case "rank_results":
-            phase_n = 7;
-            break;
-        case "compare_results":
-            phase_n = 8;
-            break;
         case "draw_conclusion":
-            phase_n = 9;
+            phase_n += 1;
 
             console.log("verified percentage:", data.verified_percentage);
             console.log("unverified percentage:", data.unverified_percentage);
@@ -504,9 +451,10 @@ function handleMessage(data_raw: string) {
             unBlur(conclusionMarkdown);
             unBlur(resultsSection)
 
-            break;
+        case "compare_results":
+            phase_n += 1;
         case "last_checks":
-            phase_n = 10;
+            phase_n += 1;
 
             // Set the domain badges
             if (data.has_bad_reputation) {
@@ -534,12 +482,83 @@ function handleMessage(data_raw: string) {
             unBlur(articleBadges);
             unBlur(extraBadges);
 
-            break;
-        case "finished":
-            phase_n = 11;
+        case "rank_results":
+            phase_n += 1;
+        case "process_search":
+            phase_n += 1;
 
-            finishAnalysis();
+            // Clear container
+            sourcesContainerList.innerHTML = "";
 
+            // Add different sources to the container
+            data.search_results.forEach((result: any) => {
+                // Search if the item already exists
+                const item = document.getElementById(`source-${result.url}`);
+                if (item) {
+                    // Already exists, skip
+                    return;
+                }
+
+                // Get number of children
+                const childrenCount = sourcesContainerList.children.length + 1;
+
+                // Create a new list item
+                const listItem = document.createElement('a');
+                listItem.id = `source-${result.url}`;
+                listItem.className = 'url';
+                listItem.href = result.url;
+                listItem.title = result.title;
+                listItem.target = '_blank';
+
+                listItem.innerHTML = (`
+                    <h4>[${childrenCount}] ${result.title}</h4>
+                    <p>${result.summary}</p>
+                `);
+
+                // Add the item to the container
+                sourcesContainerList.appendChild(listItem);
+            });
+
+            // Update the sources count
+            const sourcesCount = data.search_results.length;
+            //sourcesContainerTitle.textContent = `${TEXTS.sourcesContainer.title} ${sourcesCount}`;
+
+            // Unblur container (if blurry)
+            if (!sourcesContainer.getAttribute("blur")) {
+                unBlur(sourcesContainer);
+            }
+        case "search":
+            phase_n += 1;
+        case "process_article":
+            phase_n += 1;
+
+            // Set summary markdown
+            const summaryHtml = renderMarkdown(data.summary) as string;
+            tabList.setAttribute("data-text0", summaryHtml);
+            summaryMarkdown.innerHTML = summaryHtml;
+
+            // Set article markdown
+            const articleHtml = renderMarkdown(data.markdown) as string;
+            tabList.setAttribute("data-text1", articleHtml);
+
+            // Unblur section
+            unBlur(summaryContainer);
+
+        case "parse_article":
+            phase_n += 1;
+
+        case "download_article":
+            phase_n += 1;
+        case "check_domain":
+            phase_n += 1;
+
+            // Set the domain badges
+            ipBadgeText.textContent = data.ip;
+            locationBadgeText.textContent = `${data.ip_country}, ${data.ip_region}`;
+            domainBadgeText.textContent = data.domain;
+            
+            // Unblur section
+            unBlur(domainBadges);
             break;
         default:
             console.warn("Unknown phase:", data.phase);

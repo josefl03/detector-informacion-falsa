@@ -89,6 +89,10 @@ async def websocket_endpoint(websocket: WebSocket):
         clients.remove(websocket)
         #await websocket.close()
         
+@app.get("/")
+async def root():
+    return {"message": "Fake News Detector WebSocket Server is running!"}
+        
 if __name__ == "__main__":
-    logger.info("Starting WebSocket server on ws://localhost:8000/ws")
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    logger.info("Starting WebSocket server on 0.0.0.0:8000")
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="info")

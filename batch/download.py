@@ -7,7 +7,7 @@ import os
 
 # # Add the library
 import sys
-sys.path.append(".")
+sys.path.append("libreria/")
 
 from fake_news_detector import FakeNewsDetector
 from fake_news_detector import utils, debug
@@ -191,7 +191,7 @@ def main():
     if args.name:
         RESULTS_PATH = RESULTS_PATH.format(name=args.name)
     else:
-        RESULTS_PATH = RESULTS_PATH.format(time=datetime.now().strftime("%Y%m%d_%H%M%S"))
+        RESULTS_PATH = RESULTS_PATH.format(name=datetime.now().strftime("%Y%m%d_%H%M%S"))
         
     # Setup logging
     log_file = os.path.join(RESULTS_PATH, "latest.log")

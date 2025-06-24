@@ -13,3 +13,6 @@
 **/logs/
 **/.obsidian/
 **/.DS_Store
+**/tests/
+**/dummy/
+**/results/

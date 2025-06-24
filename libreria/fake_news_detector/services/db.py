@@ -46,12 +46,17 @@ MONGO_WEBPAGE_COLLECTION = "webpages"
 MONGO_DB_NAME = "fake_news_detector"
 
 class MongoDatabase(Database):
-    def __init__(self, mongo_uri: str = os.getenv("MONGO_URI", "mongodb://localhost:27017/")):
+    def __init__(self, mongo_uri: str = None):
         """
         Initialize the MongoDB database connection.
         
         :param mongo_uri: MongoDB connection URI.
         """
+        if not mongo_uri:
+            mongo_uri = os.getenv("MONGO_URI")
+            
+        assert mongo_uri, "MONGO_URI environment variable is not set. Please set it to your MongoDB URI."
+        
         self.client = pymongo.MongoClient(mongo_uri)
         
         self.db = self.client[MONGO_DB_NAME]
@@ -88,15 +93,19 @@ if __name__ == "__main__":
     # Initialize the embedding model
     model = OllamaEmbeddings(
         llm.LLM(
-            endpoint="http://83.97.79.137:2003/v1",
+            endpoint="",
             model = "all-minilm"
         )
     )
     # Embedding model
     
     # Test the database (MongoDB version)
+    uri = os.getenv("MONGO_URI")
+    
+    assert uri, "MONGO_URI environment variable is not set. Please set it to your MongoDB URI."
+    
     db = MongoDatabase(
-        os.getenv("MONGO_URI", "mongodb://localhost:27017/")
+        mongo_uri=uri    
     )
     db.clear()
     

@@ -7,8 +7,8 @@ services:
     # ports:
     #   - "40000:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 1234
+      MONGO_INITDB_ROOT_USERNAME: ""
+      MONGO_INITDB_ROOT_PASSWORD: ""
 
   ollama:
     build:
@@ -28,14 +28,13 @@ services:
       dockerfile: backend/Dockerfile
     container_name: backend
     ports:
-      - "30002:8000"
+      - "8001:8001"
     depends_on:
       - mongo
       - ollama
     environment:
-      MONGO_URI: "mongodb://root:1234@mongo:27017"
+      MONGO_URI: "mongodb://mongo:27017"
       OLLAMA_BASE_URL: "http://ollama:11434"
-      # command ...
 
   webapp:
     build:
@@ -46,5 +45,3 @@ services:
       - backend
     ports:
       - "8000:80"
-    environment:
-      - BACKEND_API_URL="http://backend:8000"

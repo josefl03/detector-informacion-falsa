@@ -11,7 +11,7 @@ import requests
 from fake_news_detector.datatypes import *
 import fake_news_detector.utils as utils
 
-def setup(log_file: str = None):
+def setup(log_file: str = None, skip_checks: bool = False):
     """
     Initialize the debug environment.    """
     # Setup loggers
@@ -52,9 +52,14 @@ def setup(log_file: str = None):
         os.remove(log)
     
     #logger.add("logs/tests/{time}.log", level="TRACE")
-
+    logger.debug("Logger initialized.")
+    
     # Load environment variables from .env file
     dotenv.load_dotenv(override=True)
+    
+    if skip_checks:
+        logger.debug("Skipping environment checks.")
+        return
     
     # Check if ollama is running
     logger.debug("Testing if LLM services are running...")
@@ -86,6 +91,8 @@ def test_llms():
         "ollama-embeddings": os.getenv("OLLAMA_BASE_URL"),
         "openrouter": os.getenv("OPENROUTER_BASE_URL"),
         "openai": os.getenv("OPENAI_BASE_URL"),
+        "custom": os.getenv("CUSTOM_BASE_URL"),
+        "custom-google": os.getenv("CUSTOM_BASE_URL"),
     }
 
     services = [
@@ -97,9 +104,13 @@ def test_llms():
     # Convert service to urls
     service_urls: set[str] = set()
     for service in services:
+        assert service is not None, "Service name cannot be None."
         assert service in SERVICE_ENDPOINTS, f"Service {service} is not defined in SERVICE_ENDPOINTS."
         
         url = SERVICE_ENDPOINTS.get(service)
+        
+        assert url is not None, f"Environment variable for {service} is not set inside .env file."
+        
         service_urls.add(url)
         
         #print(f"Testing service {service} at {url}")

@@ -6,8 +6,11 @@ from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential
 from abc import ABC, abstractmethod
 import sys
+from google import genai
+from google.genai import types
+import base64
 
-sys.path.append(".")
+sys.path.append("libreria/")
 import fake_news_detector.utils as utils
 import fake_news_detector.debug as debug
 
@@ -172,6 +175,214 @@ class LLM:
             str: The endpoint URL.
         """
         return self.endpoint
+    
+
+    
+class GoogleLLM:
+    input_usage: int = 0
+    output_usage: int = 0
+    
+    def __init__(self, model: str, endpoint: str = None, api_key: str = None, extra_body: Optional[Dict[str, Any]] = None):
+        self.model = model
+        self.api_key = api_key
+        self.endpoint = endpoint
+        
+        secret_api_key = api_key
+        if api_key:
+            secret_api_key = secret_api_key[:8] + "..."
+        
+        logger.debug(f"Using model {self.model} with API key {secret_api_key} at endpoint {self.endpoint}")
+
+        self.client = genai.Client(
+            api_key=self.api_key or "dummy",
+        )
+        
+        self.extra_body = extra_body
+
+    def call(self,
+             messages: "ChatBuilder",
+             temperature: float = None,
+             structure: Any = None
+             ) -> Any:
+        """
+        Call the LLM with the given parameters.
+
+        Args:
+            sys_prompt (str): System prompt to set the behavior of the model.
+            prompt (str): User prompt to generate a response.
+            temperature (float): Sampling temperature for the model.
+            structure (Any): Structure of the response.
+        """
+        # Choose the correct function
+        logger.debug(f"Calling GenerateContent with model {self.model} at {self.endpoint}")
+            
+        assert self.model, "Model not set"
+        assert self.api_key, "API key not set"
+        assert messages, "Messages not set"
+        assert isinstance(messages, ChatBuilder), "Messages must be an instance of ChatBuilder"
+        assert isinstance(messages.build(), list), "Messages must be a list"
+        assert len(messages.build()) > 0, "Messages must not be empty"
+        assert isinstance(temperature, (float, int, type(None))), "Temperature must be a float, int or None"
+        assert isinstance(structure, (type, type(None))), "Structure must be a type or None"
+        assert isinstance(self.model, str), "Model must be a string"
+        assert isinstance(self.api_key, str), "API key must be a string"
+        assert isinstance(self.endpoint, (str, type(None))), "Endpoint must be a string or None"
+        
+        logger.trace(f"Messages: {messages.build()}")
+        
+        resp = self._call(
+            messages=messages,
+            temperature=temperature,
+            structure=structure
+        )
+        
+        input_tokens = resp.usage_metadata.prompt_token_count or 0
+        output_tokens = resp.usage_metadata.candidates_token_count or 0
+        
+        self.input_usage += input_tokens
+        self.output_usage += output_tokens
+        
+        logger.debug(f"Recieved response. Input tokens: {input_tokens}, Output tokens: {output_tokens}")
+        
+        if structure:
+            result = resp.parsed
+            logger.trace(utils.short(str(result)))
+        else:
+            result = resp.text
+            logger.trace(utils.short(result))
+        
+        return result
+    
+    #@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=2, min=2, max=30))
+    def _call(
+        self,
+        messages: "ChatBuilder",
+        temperature: float = None,
+        structure: Any = None,
+        func: Callable=None,
+    ):
+        structure_mime = None
+        if structure:
+            structure_mime = "application/json"  
+        
+        # Convert contents
+        system = None
+        contents = []
+        for msg in messages.build():
+            if msg["role"] == "system":
+                system = msg["content"]
+            
+            # TODO: assistant
+            
+            elif msg["role"] == "user":
+                content = msg["content"]
+                if isinstance(content, str):
+                    # User prompts
+                    contents.append(
+                        content
+                    )
+                elif isinstance(content, list):
+                    for content in msg["content"]:
+                        # User prompts
+                        if content["type"] == "text":
+                            contents.append(content["text"])
+                            
+                        # Images
+                        elif content["type"] == "image_url":
+                            # Convert base 64 image to bytes
+                            img_b64 = content["image_url"]["url"]
+                            
+                            mime = img_b64.split(";")[0].split(":")[1]
+                            
+                            # Remove the prefix
+                            if img_b64.startswith("data:"):
+                                img_b64 = img_b64.split(",")[1]
+                            
+                            img_b = base64.b64decode(img_b64)
+                            
+                            logger.debug(f"Converted image with mime type {mime} to bytes: {img_b[:10]}...")
+
+                            contents.append(
+                                types.Part.from_bytes(
+                                    data=img_b,
+                                    mime_type=mime,
+                                )
+                            )
+                            
+                        # Documents
+                        elif content["type"] == "file":
+                            # Convert base 64 file to bytes
+                            file_b64 = content["file"]["file_data"]
+                            
+                            mime = "application/pdf"
+                            
+                            # Remove the prefix
+                            if file_b64.startswith("data:"):
+                                file_b64 = file_b64.split(",")[1]
+
+                            file_b = base64.b64decode(file_b64)
+
+                            logger.debug(f"Converted file with mime type {mime} to bytes: {file_b[:10]}...")
+
+                            contents.append(
+                                types.Part.from_bytes(
+                                    data=file_b,
+                                    mime_type=mime,
+                                )
+                            )
+                            
+        try:
+            resp = self.client.models.generate_content(
+                model=self.model,
+                contents=contents,
+                config=types.GenerateContentConfig(
+                    thinking_config=types.ThinkingConfig(thinking_budget=0),
+                    response_mime_type=structure_mime,
+                    response_schema=structure,
+                    temperature=temperature,
+                    system_instruction=system,
+                    max_output_tokens=MAX_TOKENS,
+                )
+            )
+            
+            return resp
+        except Exception as e:
+            logger.error(f"Error: {e}")
+            utils.wait_input(f"Analysis paused. Endpoint: {self.endpoint}")
+            raise
+
+    def models(self):
+        """
+        Get all available models.
+        """
+        return self.client.models.list()
+    
+    def get_usage(self) -> Tuple[int, int]:
+        """
+        Get the usage of the LLM.
+        
+        Returns:
+            Tuple[int, int]: A tuple containing the input and output token usage.
+        """
+        return self.input_usage, self.output_usage
+    
+    def get_model(self) -> str:
+        """
+        Get the model name.
+        
+        Returns:
+            str: The model name.
+        """
+        return self.model
+    
+    def get_endpoint(self) -> str:
+        """
+        Get the endpoint URL.
+        
+        Returns:
+            str: The endpoint URL.
+        """
+        return self.endpoint
         
 class OpenAI(LLM):
     def __init__(self, model: str):
@@ -253,6 +464,8 @@ GENERIC_SERVICES = [
     "openrouter",
     "ollama",
     "ollama-embeddings",
+    "custom",
+    "custom-google",
 ] 
 
 class GenericLLM():
@@ -268,6 +481,14 @@ class GenericLLM():
             return Ollama(model=model)
         elif service == "ollama-embeddings":
             return OllamaEmbeddings(model=model)
+        elif service == "custom":
+            return LLM(model=model, endpoint=os.getenv("CUSTOM_BASE_URL"), api_key=os.getenv("CUSTOM_API_KEY"))
+        elif service == "custom-google":
+            return GoogleLLM(model=model, endpoint=os.getenv("CUSTOM_BASE_URL"), api_key=os.getenv("CUSTOM_API_KEY"))
+
+API_FORMATS = [
+    "default",
+    ]
 
 class ChatBuilder:
     messages: List
@@ -329,7 +550,7 @@ class ChatBuilder:
 
 # Test
 if __name__ == "__main__":
-    debug.setup()
+    debug.setup(skip_checks=True)
     
     # Initialize OPENAI client
     # openai_client = LLM(
@@ -363,7 +584,7 @@ if __name__ == "__main__":
     def test_image():
         msgs = ChatBuilder()
         msgs.system("Say everything in uppercase")
-        msgs.image_prompt("What's in this image?", utils.image_to_b64("dummy/capybara.jpg"))
+        msgs.image_prompt("What's in this image?", utils.image_to_b64("../../../dummy/capybara.jpg"))
 
         response = openai_client.call(
             messages=msgs,
@@ -449,4 +670,122 @@ if __name__ == "__main__":
                 
             logger.success(f"Service {service} test passed")
             
-    test_services()
+    #test_services()
+    
+    def test_proxied_llm():
+        # Test the proxied LLM
+        llm = GenericLLM.choose(
+            model=os.getenv("PDF_MODEL"),
+            service="custom-google"
+        )
+        
+        msgs = ChatBuilder()
+        msgs.system("Say everything in uppercase")
+        msgs.user("Say hello")
+
+        response = llm.call(
+            messages=msgs,
+        )
+        
+        logger.debug(f"Response from proxied LLM: {response}")
+        assert "HELLO" in response
+        logger.success("Proxied LLM test passed")
+    #test_proxied_llm()
+    
+    def test_google_llm():
+        google_llm = GenericLLM.choose(
+            model=os.getenv("PDF_MODEL"),
+            service="custom-google"
+        )
+        
+        msgs = ChatBuilder()
+        msgs.system("Say everything in uppercase")
+        msgs.user("Say hello and add some extra data to make it longer")
+
+        response = google_llm.call(
+            messages=msgs,
+        )
+        
+        logger.debug(f"Response from Google LLM: {response}")
+        assert "HELLO" in response
+        logger.success("Google LLM test passed")
+    #test_google_llm()
+    
+    
+    def test_google_llm_with_image():
+        google_llm = GenericLLM.choose(
+            model=os.getenv("PDF_MODEL"),
+            service="custom-google"
+        )
+        
+        msgs = ChatBuilder()
+        msgs.system("Describe the image")
+        # Use a sample image path; replace with your actual image if needed
+        image_b64 = utils.image_to_b64("libreria/dummy/capybara.jpeg")
+        msgs.user("What animal is in this image?", image_uri=image_b64)
+
+        response = google_llm.call(
+            messages=msgs,
+        )
+        
+        logger.debug(f"Response from Google LLM (image): {response}")
+        assert any(word in response.lower() for word in ["capybara", "animal", "rodent"]), "Expected animal description in response"
+        logger.success("Google LLM image test passed")
+    #test_google_llm_with_image()
+    
+    def test_google_llm_structured():
+        from pydantic import BaseModel
+        class AnimalInfo(BaseModel):
+            name: str
+            type: str
+            habitat: str
+
+        google_llm = GenericLLM.choose(
+            model=os.getenv("PDF_MODEL"),
+            service="custom-google"
+        )
+        
+        msgs = ChatBuilder()
+        msgs.system("Return the following fields in JSON: name, type, habitat for a capybara.")
+        msgs.user("Give me the animal info for a capybara.")
+
+        response = google_llm.call(
+            messages=msgs,
+            structure=AnimalInfo
+        )
+        
+        logger.debug(f"Structured response from Google LLM: {response}")
+        assert isinstance(response, AnimalInfo)
+        assert response.name.lower() == "capybara"
+        logger.success("Google LLM structured output test passed")
+    #test_google_llm_structured()
+    
+    def test_google_llm_structured_pdf():
+        from pydantic import BaseModel
+        class PDFInfo(BaseModel):
+            title: str
+            author: str
+            num_pages: int
+
+        google_llm = GenericLLM.choose(
+            model=os.getenv("PDF_MODEL"),
+            service="custom-google"
+        )
+        
+        pdf_b64 = utils.load_b64("libreria/dummy/elpais.pdf")
+        msgs = ChatBuilder()
+        msgs.system("Extract the following fields from the PDF: title, author, num_pages. Respond in JSON.")
+        msgs.user("Extract info from this PDF.", pdf_name="test.pdf", pdf_uri=pdf_b64)
+
+        response = google_llm.call(
+            messages=msgs,
+            structure=PDFInfo
+        )
+        
+        logger.debug(f"Structured PDF response from Google LLM: {response}")
+        assert isinstance(response, PDFInfo)
+        assert response.title, "Title should not be empty"
+        assert response.num_pages > 0, "Number of pages should be positive"
+        logger.success("Google LLM structured PDF output test passed")
+    #test_google_llm_structured_pdf()
+
