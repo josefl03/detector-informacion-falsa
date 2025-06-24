@@ -1,3 +1,4 @@
+# Detector Automático de Información Falsa
 Sistema para la detección automática de información falsa en periódicos web, utilizando fuentes públicas y modelos de lenguaje.
 
 Este proyecto ha sido desarrollado como Trabajo de Fin de Grado por Jose Fernández ([Linkedin](https://www.linkedin.com/home?originalSubdomain=es)) ([Email](mailto:jose.fernanlo03@gmail.com)), y presentado en Junio de 2025 en la Universidad de Alcalá.
