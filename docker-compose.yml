@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:8.0
+    container_name: mongo
+    # ports:
+    #   - "40000:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 1234
+
+  ollama:
+    build:
+      context: .
+      dockerfile: libreria/Dockerfile
+      target: ollama
+    container_name: ollama
+    # ports:
+    #   - "40001:11434"
+    environment:
+      OLLAMA_HOST: "0.0.0.0"
+      OLLAMA_MODELS: "/ollama/"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: backend
+    ports:
+      - "30002:8000"
+    depends_on:
+      - mongo
+      - ollama
+    environment:
+      MONGO_URI: "mongodb://root:1234@mongo:27017"
+      OLLAMA_BASE_URL: "http://ollama:11434"
+      # command ...
+
+  webapp:
+    build:
+      context: ./webapp
+      dockerfile: Dockerfile
+    container_name: webapp
+    depends_on:
+      - backend
+    ports:
+      - "8000:80"
+    environment:
+      - BACKEND_API_URL="http://backend:8000"

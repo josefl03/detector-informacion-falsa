@@ -78,7 +78,7 @@ class FakeNewsDetector:
         #mock = True
         if mock:
             # Use a mocked pipe for testing
-            self.pipe = debug.load_pipe("20250614_175519_675_last_checks.pkl")
+            #self.pipe = debug.load_pipe("20250614_175519_675_last_checks.pkl")
             pass
         
         try:

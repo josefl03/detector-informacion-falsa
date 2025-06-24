@@ -7,7 +7,8 @@ import Card from "../components/Card.astro";
 
 window as any;
 
-const WS_BASE_URL = "ws://localhost:8000/ws"
+const BACKEND_API_URL = import.meta.env.PUBLIC_BACKEND_API_URL || "ws://localhost:8000/ws";
+
 const ALERTS = false; // Set to true to enable alerts
 
 const phaseProgress = document.getElementById('phase-progressbar') as HTMLDivElement;
@@ -186,9 +187,9 @@ expandButton.addEventListener('click', () => {
 let socket: WebSocket;
 
 function startWebsockets() {
-    console.log("Starting WebSocket connection...");
+    console.log("Starting WebSocket connection... to: ", BACKEND_API_URL);
     
-    socket = new WebSocket(WS_BASE_URL);
+    socket = new WebSocket(BACKEND_API_URL);
     (window as any).socket = socket; // For debugging purposes
 
     // Set up event listeners

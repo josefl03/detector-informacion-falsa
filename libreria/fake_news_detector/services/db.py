@@ -46,7 +46,7 @@ MONGO_WEBPAGE_COLLECTION = "webpages"
 MONGO_DB_NAME = "fake_news_detector"
 
 class MongoDatabase(Database):
-    def __init__(self, mongo_uri: str = os.getenv("MONGODB_BASE_URL")):
+    def __init__(self, mongo_uri: str = os.getenv("MONGO_URI", "mongodb://localhost:27017/")):
         """
         Initialize the MongoDB database connection.
         

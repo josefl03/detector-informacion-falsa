@@ -11,3 +11,4 @@
 **/*.ays
 **/*.egg-info/
 **/logs/
+**/.DS_Store

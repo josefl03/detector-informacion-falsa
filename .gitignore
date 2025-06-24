@@ -11,3 +11,5 @@
 **/*.ays
 **/*.egg-info/
 **/logs/
+**/.obsidian/
+**/.DS_Store
