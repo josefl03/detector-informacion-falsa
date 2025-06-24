@@ -316,6 +316,10 @@ class FakeNewsDetector:
             url = utils.clean_url(search_result.url)
             search_result.url = url
             
+            if url == pipe.article.url:
+                logger.warning(f"Skipping the article's own URL: {url}")
+                continue
+            
             logger.info(f"[{i}] Processing search result: {search_result.url}")
             
             # Search in cache
